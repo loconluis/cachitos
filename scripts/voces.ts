@@ -1,13 +1,14 @@
 /**
- * Genera los audios de la narración con la API de texto a voz de xAI.
+ * Genera los audios de la narración con la API de texto a voz de OpenAI.
  *
  *   pnpm run voces                 genera lo que falta o cambió (todas las series)
  *   pnpm run voces --muestra       una línea por personaje, para comparar voces
  *   pnpm run voces --solo ep1,r1
  *   pnpm run voces --force         regenera todo lo seleccionado
- *   pnpm run voces --dry           solo muestra qué haría y cuánto costaría
+ *   pnpm run voces --dry           solo muestra qué haría y cuántos caracteres gastaría
  *
- * Necesita XAI_API_KEY en .env.local. La clave se usa solo acá, nunca va dentro de la app.
+ * Necesita OPENAI_API_KEY en .env.local (opcional: OPENAI_TTS_MODEL).
+ * La clave se usa solo acá, nunca va dentro de la app.
  * Escribe public/voces/<serie>/<clave>.mp3 y public/voces/<serie>/manifest.json.
  */
 import {
@@ -25,8 +26,7 @@ import { runnerImport } from 'vite'
 import type { Series } from '../src/engine/types'
 import type * as SpeechText from '../src/engine/speechText'
 
-const ENDPOINT = 'https://api.x.ai/v1/tts'
-const USD_PER_MILLION_CHARS = 15
+const ENDPOINT = 'https://api.openai.com/v1/audio/speech'
 
 const { values: args } = parseArgs({
   args: process.argv.slice(2).filter((a) => a !== '--'),
@@ -43,9 +43,10 @@ try {
 } catch {
   /* sin .env.local: puede venir del entorno */
 }
-const apiKey = process.env.XAI_API_KEY?.trim()
+const apiKey = process.env.OPENAI_API_KEY?.trim()
+const model = process.env.OPENAI_TTS_MODEL?.trim() || 'gpt-4o-mini-tts'
 if (!apiKey && !args.dry) {
-  console.error('Falta XAI_API_KEY. Copiá .env.example a .env.local y pegá tu clave de xAI.')
+  console.error('Falta OPENAI_API_KEY. Copiá .env.example a .env.local y pegá tu clave de OpenAI.')
   process.exit(1)
 }
 
@@ -54,12 +55,18 @@ const { module: content } = await runnerImport<{ allSeries: readonly Series[] }>
 )
 const { module: speech } = await runnerImport<typeof SpeechText>('./src/engine/speechText.ts')
 
-async function tts(text: string, voice: string, language: string): Promise<Buffer> {
+async function tts(text: string, voice: string, instructions?: string): Promise<Buffer> {
   for (let attempt = 1; ; attempt++) {
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice_id: voice, language }),
+      body: JSON.stringify({
+        model,
+        voice,
+        input: text,
+        response_format: 'mp3',
+        ...(instructions ? { instructions } : {}),
+      }),
       signal: AbortSignal.timeout(60_000),
     })
     const type = res.headers.get('content-type') ?? ''
@@ -69,7 +76,7 @@ async function tts(text: string, voice: string, language: string): Promise<Buffe
       await new Promise((r) => setTimeout(r, 1500 * attempt))
       continue
     }
-    throw new Error(`xAI respondió ${res.status}: ${body.slice(0, 300)}`)
+    throw new Error(`OpenAI respondió ${res.status}: ${body.slice(0, 300)}`)
   }
 }
 
@@ -98,16 +105,25 @@ for (const series of content.allSeries) {
   }
 
   const voiceFor = (speaker: string) => casting.bySpeaker[speaker] ?? casting.fallback
+  const styleFor = (speaker: string) => casting.styles?.[speaker]
+  // Lo que se guarda en el manifest: si cambia la voz o su estilo, se regeneran esas líneas.
+  const signature = (speaker: string) => {
+    const style = styleFor(speaker)
+    return style ? `${voiceFor(speaker)} | ${style}` : voiceFor(speaker)
+  }
   const todo = lines.filter((l) => {
     const prev = manifest[l.key]
     return (
-      args.force || !prev || prev.voice !== voiceFor(l.speaker) || !existsSync(join(dir, prev.file))
+      args.force ||
+      !prev ||
+      prev.voice !== signature(l.speaker) ||
+      !existsSync(join(dir, prev.file))
     )
   })
   const chars = todo.reduce((a, l) => a + speech.toSpeech(l.text).length, 0)
   totalChars += chars
   console.log(
-    `\n${series.title}: ${lines.length} líneas, ${todo.length} por generar (${chars} caracteres ≈ US$${((chars / 1e6) * USD_PER_MILLION_CHARS).toFixed(3)})`,
+    `\n${series.title}: ${lines.length} líneas, ${todo.length} por generar (${chars} caracteres)`,
   )
 
   for (const [i, line] of todo.entries()) {
@@ -119,10 +135,10 @@ for (const series of content.allSeries) {
       continue
     }
     try {
-      const audio = await tts(said, voice, casting.language)
+      const audio = await tts(said, voice, styleFor(line.speaker))
       const file = `${line.key}.mp3`
       writeFileSync(join(dir, file), audio)
-      manifest[line.key] = { file, voice, text: line.text }
+      manifest[line.key] = { file, voice: signature(line.speaker), text: line.text }
       writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n')
       console.log(`  ✓ ${tag} ${kb(audio.length)}`)
     } catch (e) {
@@ -154,6 +170,6 @@ for (const series of content.allSeries) {
 }
 
 console.log(
-  `\nTotal enviado: ${totalChars} caracteres ≈ US$${((totalChars / 1e6) * USD_PER_MILLION_CHARS).toFixed(3)}${failures ? ` · ${failures} con error` : ''}`,
+  `\nTotal enviado: ${totalChars} caracteres${failures ? ` · ${failures} con error` : ''}`,
 )
 process.exit(failures ? 1 : 0)

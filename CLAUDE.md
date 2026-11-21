@@ -52,7 +52,7 @@ Cada respuesta correcta se verifica aritméticamente en los tests.
 ## Fuera de alcance (preguntar antes de agregar)
 
 Chat, IA en tiempo de ejecución, cuentas, panel docente, otras materias, video real, backend.
-La voz generada con xAI está permitida porque corre **al construir**, no en el teléfono.
+La voz generada con OpenAI está permitida porque corre **al construir**, no en el teléfono.
 
 ## Criterio de terminado
 
@@ -97,15 +97,15 @@ pnpm run voces --dry | --muestra | --solo ep1,r1 | --force
 - Usar **pnpm**, no npm. Node vía nvm (`.nvmrc`).
 - Correr `pnpm run lint` antes de cada commit.
 
-## Narración (xAI)
+## Narración (OpenAI)
 
-- `scripts/voces.ts` llama a `POST https://api.x.ai/v1/tts` (`text`, `voice_id`, `language`), que devuelve MP3. Escribe `public/voces/<serie>/<hash>.mp3` y `manifest.json`.
-- La clave va en `.env.local` (`XAI_API_KEY`, ignorado por git). Nunca la incluyas en la app ni en commits.
+- `scripts/voces.ts` llama a `POST https://api.openai.com/v1/audio/speech` (`model` gpt-4o-mini-tts, `voice`, `input`, `instructions`), que devuelve MP3. Escribe `public/voces/<serie>/<hash>.mp3` y `manifest.json`.
+- La clave va en `.env.local` (`OPENAI_API_KEY`, ignorado por git). Nunca la incluyas en la app ni en commits.
 - El hash sale de quién habla más el texto (`src/engine/speechText.ts`). Si se edita un texto, la app vuelve a speechSynthesis hasta regenerar.
-- Voces disponibles: eve, ara, rex, sal, leo. Las del reparto actual no se han escuchado todavía.
+- Las voces son nombres de OpenAI (coral, sage, ash…) más `styles` opcionales por personaje en `src/content/lupita/voces.ts`. Aún no se han escuchado.
 
 ## Trampas conocidas
 
-- La red de la hackathon intercepta TLS (Fortinet): npm falla con `UNABLE_TO_VERIFY_LEAF_SIGNATURE`. Las dependencias se instalaron con `pnpm add --offline` desde la caché local, con versiones fijas (Vite 7.2, TS 5.9, Tailwind vía `@tailwindcss/postcss`). `vite-plugin-pwa` **no** está en la caché: hace falta otra red o escribir el service worker a mano. `api.x.ai` sí pasa. No desactivar `strict-ssl`.
+- La red de la hackathon intercepta TLS (Fortinet): npm falla con `UNABLE_TO_VERIFY_LEAF_SIGNATURE`. Las dependencias se instalaron con `pnpm add --offline` desde la caché local, con versiones fijas (Vite 7.2, TS 5.9, Tailwind vía `@tailwindcss/postcss`). `vite-plugin-pwa` **no** está en la caché: hace falta otra red o escribir el service worker a mano. Falta comprobar si `api.openai.com` pasa. No desactivar `strict-ssl`.
 - En SVG, una animación CSS con `transform` pisa el atributo `transform`: anidá un `<g>` para posicionar y otro para animar.
 - Para verificar la interfaz no hay Playwright. Se usó Chrome headless por CDP (script en el scratchpad de la sesión).

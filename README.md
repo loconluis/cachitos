@@ -32,11 +32,11 @@ En los textos, `*así*` resalta en amarillo y las fracciones como `1/4` se forma
 ## Narración
 
 El texto en pantalla es la fuente de verdad. La narración es opcional: usa audios pregenerados
-con la API de voz de xAI y, para las líneas sin audio, la voz en español del dispositivo.
+con la API de voz de OpenAI y, para las líneas sin audio, la voz en español del dispositivo.
 
 ```bash
-cp .env.example .env.local   # pegá XAI_API_KEY
-pnpm run voces --dry         # qué generaría y cuánto cuesta
+cp .env.example .env.local   # pegá OPENAI_API_KEY
+pnpm run voces --dry         # qué generaría y cuántos caracteres gasta
 pnpm run voces --muestra     # una línea por personaje, para elegir voces
 pnpm run voces               # todo lo que falte o haya cambiado
 ```

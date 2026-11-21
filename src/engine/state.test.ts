@@ -71,6 +71,58 @@ describe('flujo del episodio 1', () => {
   })
 })
 
+describe('flujo del episodio 2', () => {
+  const ep2Option = (label: string) => {
+    const ch = lupita.episodes.ep2!.challenge!
+    return ch.type === 'choice' ? ch.options.findIndex((o) => o.label.startsWith(label)) : -1
+  }
+  /** Llega al reto del episodio 2 acertando el episodio 1. */
+  const atEp2 = () => {
+    let s = toChallenge(lupita, initialState(lupita))
+    s = reduce(lupita, s, { type: 'answer', value: optionIndex('1/4') })
+    return toChallenge(lupita, reduce(lupita, s, { type: 'advance' }))
+  }
+
+  it('fallar diciendo que le falta frijol lleva a R2, luego a un reto manipulativo distinto, y luego al episodio 3', () => {
+    let s = atEp2()
+    expect(s.episode).toBe('ep2')
+
+    s = reduce(lupita, s, { type: 'answer', value: ep2Option('Le falta') })
+    expect(s.phase).toMatchObject({ name: 'bridge', via: 'numeros-distintos' })
+
+    s = reduce(lupita, s, { type: 'advance' })
+    expect(s.episode).toBe('r2')
+
+    s = toChallenge(lupita, s)
+    const ch = lupita.episodes[s.episode]!.challenge!
+    expect(ch.id).not.toBe(lupita.episodes.ep2!.challenge!.id)
+    expect(ch.skill).toBe('equivalencia')
+    expect(ch.type).toBe('fill')
+
+    s = reduce(lupita, s, { type: 'answer', value: 6 })
+    s = toChallenge(lupita, reduce(lupita, s, { type: 'advance' }))
+    expect(s.episode === 'ep3' || s.phase.name === 'end').toBe(true)
+    expect(s.attempts.map((a) => a.correct)).toEqual([true, false, true])
+  })
+
+  it('acertar que no falta nada sigue directo al episodio 3', () => {
+    let s = atEp2()
+    s = reduce(lupita, s, { type: 'answer', value: ep2Option('Nada') })
+    s = reduce(lupita, s, { type: 'advance' })
+    expect(s.episode).toBe('ep3')
+  })
+
+  it('fallar también en R2 pasa por el repaso y retoma la historia', () => {
+    let s = atEp2()
+    s = reduce(lupita, s, { type: 'answer', value: ep2Option('Le falta') })
+    s = toChallenge(lupita, reduce(lupita, s, { type: 'advance' }))
+    s = reduce(lupita, s, { type: 'answer', value: 3 })
+    expect(s.episode).toBe('r2-repaso')
+    s = toChallenge(lupita, s)
+    expect(s.episode === 'ep3' || s.phase.name === 'end').toBe(true)
+  })
+})
+
 describe('el validador detecta contenido roto', () => {
   it('opción incorrecta sin refuerzo, destino inexistente y respuesta mal calculada', () => {
     const ep1 = lupita.episodes.ep1!

@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cachitos",
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": [
+        "-c",
+        ". /opt/homebrew/opt/nvm/nvm.sh && nvm use 24 >/dev/null && pnpm exec vite --port 5173 --strictPort"
+      ],
+      "port": 5173
+    }
+  ]
+}

@@ -15,7 +15,13 @@ export function Barra({
   label,
   translucent,
   instant,
-}: BarSpec & { translucent?: boolean; instant?: boolean }) {
+  labelSpace,
+}: BarSpec & {
+  translucent?: boolean
+  instant?: boolean
+  /** Reserva el espacio de la etiqueta aunque no haya, para alinear barras superpuestas. */
+  labelSpace?: boolean
+}) {
   return (
     <div className="flex w-full items-center gap-3">
       <div className="relative flex h-14 flex-1 overflow-hidden rounded-xl border-[3px] border-white/80 bg-white/10">
@@ -33,7 +39,9 @@ export function Barra({
           </div>
         ))}
       </div>
-      {label && <span className="w-14 text-right text-2xl font-black">{label}</span>}
+      {(label || labelSpace) && (
+        <span className="w-14 shrink-0 text-right text-2xl font-black">{label}</span>
+      )}
     </div>
   )
 }
@@ -50,10 +58,17 @@ export function Barras({
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6">
       {overlap ? (
+        // Superpuestas: todas las pistas miden lo mismo; solo se ve la etiqueta de la de abajo.
         <div className="relative w-full">
           {bars.map((b, i) => (
             <div key={i} className={i === 0 ? 'relative' : 'absolute inset-0'}>
-              <Barra {...b} color={b.color ?? COLORS[i % COLORS.length]} translucent={i > 0} />
+              <Barra
+                {...b}
+                label={i === 0 ? b.label : undefined}
+                labelSpace={bars.some((x) => x.label)}
+                color={b.color ?? COLORS[i % COLORS.length]}
+                translucent={i > 0}
+              />
             </div>
           ))}
         </div>

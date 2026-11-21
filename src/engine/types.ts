@@ -139,4 +139,6 @@ export interface VoiceCasting {
   /** Voz por defecto si un personaje no tiene una asignada. */
   fallback: string
   bySpeaker: Readonly<Record<string, string>>
+  /** Instrucciones de estilo opcionales por personaje (tono, edad, acento). */
+  styles?: Readonly<Record<string, string>>
 }
