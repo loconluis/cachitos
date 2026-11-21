@@ -1,0 +1,85 @@
+/* Paleta de la app: escenario morado, amarillo tortilla, lila claro. Escala: 120 / 72 / 44 / 32 / 24. */
+section {
+  padding: 128px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  background: #F7F2FB;
+  color: #24152F;
+  font-family: 'Nunito Sans', Arial, sans-serif;
+}
+section.dark { background: #24143A; color: #F7F2FB; }
+section.sun { background: #F3B61F; color: #24152F; }
+section.foot { padding: 128px 128px 160px; }
+section.center { justify-content: center; }
+
+.eyebrow { font-size: 24px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #7A3FA8; }
+section.dark .eyebrow { color: #F3B61F; }
+section.sun .eyebrow { color: #24152F; }
+
+h1 { font-family: 'Fredoka', Verdana, sans-serif; font-size: 120px; font-weight: 600; line-height: 1.05; }
+h2 { font-family: 'Fredoka', Verdana, sans-serif; font-size: 72px; font-weight: 600; line-height: 1.1; }
+h3 { font-family: 'Fredoka', Verdana, sans-serif; font-size: 44px; font-weight: 600; line-height: 1.15; }
+
+.lead { font-size: 44px; line-height: 1.3; }
+.body { font-size: 32px; line-height: 1.45; color: #5E4D6B; }
+section.dark .body { color: #CDBFDB; }
+.hl { color: #7A3FA8; }
+section.dark .hl { color: #F3B61F; }
+.source { position: absolute; left: 128px; bottom: 64px; width: 1664px; font-size: 24px; color: #5E4D6B; }
+
+/* Portada */
+.cover-text { width: 1080px; display: flex; flex-direction: column; gap: 32px; }
+.cover-lead { font-size: 44px; line-height: 1.3; color: #CDBFDB; }
+.cover-art { position: absolute; left: 1312px; top: 330px; width: 420px; height: 420px; }
+
+/* Gancho */
+.big-q { color: #F3B61F; }
+
+/* Dato con cuadrícula */
+.split { display: flex; gap: 96px; align-items: center; }
+.split-text { width: 1128px; display: flex; flex-direction: column; gap: 32px; }
+
+/* Cadenas de pasos */
+.chain { display: flex; align-items: stretch; gap: 16px; }
+.step {
+  flex: 1;
+  background: #FFFDFB;
+  border: 2px solid #DCCFE8;
+  border-radius: 24px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.step-k { font-size: 24px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #7A3FA8; }
+.step-v { font-family: 'Fredoka', Verdana, sans-serif; font-size: 32px; font-weight: 600; line-height: 1.2; color: #24152F; }
+.step.on { background: #F3B61F; border-color: #F3B61F; }
+.step.on .step-k { color: #24152F; }
+.arrow { width: 48px; height: 24px; align-self: center; background: #B9A7C9; }
+
+/* Tarjetas sobre fondo oscuro */
+.cards { display: flex; gap: 32px; }
+.card {
+  flex: 1;
+  background: #33204D;
+  border-radius: 24px;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.card-t { font-family: 'Fredoka', Verdana, sans-serif; font-size: 32px; font-weight: 600; line-height: 1.2; color: #F3B61F; }
+.card-b { font-size: 24px; line-height: 1.45; color: #CDBFDB; }
+
+/* Listas */
+.list { font-size: 32px; line-height: 1.45; color: #24152F; padding-left: 48px; }
+.list li { margin-bottom: 16px; }
+section.dark .list { color: #F7F2FB; }
+.cols { display: flex; gap: 64px; }
+.col { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+
+/* Llegada */
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise 500ms ease-out both; animation-delay: calc(var(--i, 0) * 120ms); }

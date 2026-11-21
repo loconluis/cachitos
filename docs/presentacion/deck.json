@@ -1,0 +1,19 @@
+{
+  "v": 5,
+  "createdOnFiles": { "v": 1, "at": "2026-11-21T20:40:00Z" },
+  "lists": "css",
+  "format": { "v": 1, "shared": ["project/deck.css"] },
+  "title": "Cachitos: el puesto de Lupita",
+  "order": ["cover", "gancho", "problema", "vacio", "para-quien", "idea", "formato", "demo", "estado", "cierre"],
+  "sections": {
+    "s1": { "description": "El gancho y el problema de matemáticas en Guatemala", "start": "cover" },
+    "s2": { "description": "Para quién es y cómo funciona la serie", "start": "para-quien" },
+    "s3": { "description": "Por qué el formato engancha y el demo en vivo", "start": "formato" },
+    "s4": { "description": "Dónde estamos y cierre", "start": "estado" }
+  },
+  "faces": {
+    "fredoka": { "family": "Fredoka", "href": "https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&display=swap" },
+    "nunito-sans": { "family": "Nunito Sans", "href": "https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" }
+  },
+  "designSystems": []
+}
